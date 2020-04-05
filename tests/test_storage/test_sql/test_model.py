@@ -1,6 +1,6 @@
 from typing import List
 
-from py_abac.policy import Policy
+from py_abac.policy.policy import Policy
 from py_abac.storage.sql.model import PolicyModel, TargetModel
 
 

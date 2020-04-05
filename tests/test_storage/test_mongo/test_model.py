@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from py_abac.policy import Policy
+from py_abac.policy.policy import Policy
 from py_abac.storage.mongo.model import PolicyModel
 
 

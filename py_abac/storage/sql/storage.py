@@ -11,7 +11,7 @@ from sqlalchemy.orm.exc import FlushError
 from .model import PolicyModel
 from ..base import StorageBase
 from ...exceptions import PolicyExistsError
-from ...policy import Policy
+from ...policy.policy import Policy
 
 LOG = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from py_abac.exceptions import PolicyExistsError
-from py_abac.policy import Policy
+from py_abac.policy.policy import Policy
 from py_abac.policy.conditions.numeric import Eq
 from py_abac.policy.conditions.string import Equals
 from py_abac.request import AccessRequest

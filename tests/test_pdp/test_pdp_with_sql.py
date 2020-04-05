@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from py_abac.pdp import PDP, EvaluationAlgorithm
-from py_abac.policy import Policy
+from py_abac.policy.policy import Policy
 from py_abac.provider.base import AttributeProvider
 from py_abac.request import AccessRequest
 from py_abac.storage.sql import SQLStorage
@@ -147,11 +147,17 @@ POLICIES = [
 
 
 class EmailsAttributeProvider(AttributeProvider):
+    ace = "subject"
+    attribute_path = "$.email"
 
-    def get_attribute_value(self, ace: str, attribute_path: str, ctx):
-        if ace == "subject" and attribute_path == "$.email":
-            if ctx.get_attribute_value(ace, "$.name") == "Ben":
-                return "ben@gmail.com"
+    def get_attribute_value(self):
+        if not self.attribute_values:
+            # get user_id
+            user_id = self.attribute_values_cache[self.ace]["$.name"]
+            # check against db its email
+            # pretending to connect to db and find by user_id
+            self.attribute_values = "ben@gmail.com"
+        return self.attribute_values
 
 
 @pytest.fixture
@@ -406,7 +412,7 @@ def st(session):
     ),
 ])
 def test_is_allowed_deny_overrides(st, desc, request_json, should_be_allowed):
-    pdp = PDP(st, EvaluationAlgorithm.DENY_OVERRIDES, [EmailsAttributeProvider()])
+    pdp = PDP(st, EvaluationAlgorithm.DENY_OVERRIDES, [EmailsAttributeProvider])
     request = AccessRequest.from_json(request_json)
     assert should_be_allowed == pdp.is_allowed(request)
 
@@ -645,7 +651,7 @@ def test_is_allowed_deny_overrides(st, desc, request_json, should_be_allowed):
     ),
 ])
 def test_is_allowed_allow_overrides(st, desc, request_json, should_be_allowed):
-    pdp = PDP(st, EvaluationAlgorithm.ALLOW_OVERRIDES, [EmailsAttributeProvider()])
+    pdp = PDP(st, EvaluationAlgorithm.ALLOW_OVERRIDES, [EmailsAttributeProvider])
     request = AccessRequest.from_json(request_json)
     assert should_be_allowed == pdp.is_allowed(request)
 
@@ -884,7 +890,7 @@ def test_is_allowed_allow_overrides(st, desc, request_json, should_be_allowed):
     ),
 ])
 def test_is_allowed_highest_priority(st, desc, request_json, should_be_allowed):
-    pdp = PDP(st, EvaluationAlgorithm.HIGHEST_PRIORITY, [EmailsAttributeProvider()])
+    pdp = PDP(st, EvaluationAlgorithm.HIGHEST_PRIORITY, [EmailsAttributeProvider])
     request = AccessRequest.from_json(request_json)
     assert should_be_allowed == pdp.is_allowed(request)
 

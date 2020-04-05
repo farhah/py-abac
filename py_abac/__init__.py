@@ -5,7 +5,6 @@
 import logging
 
 from .pdp import PDP, EvaluationAlgorithm
-from .policy import Policy
 from .request import AccessRequest, Request
 from .version import version_info, __version__
 

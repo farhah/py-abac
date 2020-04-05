@@ -5,7 +5,7 @@
 import json
 
 from ..utils import get_sub_wildcard_queries, get_all_wildcard_queries
-from ...policy import Policy
+from ...policy.policy import Policy
 from ...policy.targets import Targets
 
 

@@ -1,15 +1,15 @@
 """
     Request attribute provider implementation
 """
-
+from typing import Dict
 from objectpath import Tree
 
-from .base import AttributeProvider
+from .base import BaseAttributeProvider
 from ..exceptions import InvalidAccessControlElementError, InvalidAttributePathError
 from ..request import AccessRequest
 
 
-class RequestAttributeProvider(AttributeProvider):
+class RequestAttributeProvider(BaseAttributeProvider):
     """
         Request attribute provider
     """
@@ -28,9 +28,13 @@ class RequestAttributeProvider(AttributeProvider):
 
         # Cache of attribute location and value pairs per access element used for quick attribute
         # value retrieval
-        self._attribute_values_cache = {"subject": {}, "resource": {}, "action": {}, "context": {}}
+        self.attribute_values_cache: Dict[str, Dict[str, str]] = {"subject": {},
+                                                                  "resource": {},
+                                                                  "action": {},
+                                                                  "context": {}
+                                                                 }
 
-    def get_attribute_value(self, ace, attribute_path, ctx):
+    def get_attribute_value(self, ace: str, attribute_path: str) -> str:
         """
             Get value for given access control element and attribute path.
 
@@ -46,8 +50,8 @@ class RequestAttributeProvider(AttributeProvider):
             raise InvalidAccessControlElementError(ace)
 
         # Check if attribute value stored in cache
-        if attribute_path in self._attribute_values_cache[ace]:
-            rvalue = self._attribute_values_cache[ace][attribute_path]
+        if attribute_path in self.attribute_values_cache[ace]:
+            rvalue = self.attribute_values_cache[ace][attribute_path]
         else:
             # Attribute value not found in cache so get it from ObjectPath tree
             try:
@@ -56,5 +60,5 @@ class RequestAttributeProvider(AttributeProvider):
             except Exception:
                 raise InvalidAttributePathError(attribute_path)
             # Store the obtained value in cache
-            self._attribute_values_cache[ace][attribute_path] = rvalue
+            self.attribute_values_cache[ace][attribute_path] = rvalue
         return rvalue

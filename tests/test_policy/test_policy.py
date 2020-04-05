@@ -8,7 +8,7 @@ import pytest
 
 from py_abac.context import EvaluationContext
 from py_abac.exceptions import PolicyCreateError
-from py_abac.policy import Policy
+from py_abac.policy.policy import Policy
 from py_abac.policy.conditions.numeric import Eq
 from py_abac.policy.conditions.string import Equals
 from py_abac.policy.rules import Rules

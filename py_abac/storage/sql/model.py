@@ -9,7 +9,7 @@ from sqlalchemy import literal
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from ...policy import Policy
+from ...policy.policy import Policy
 
 Base = declarative_base()
 

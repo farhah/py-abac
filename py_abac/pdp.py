@@ -3,7 +3,10 @@
 """
 
 from enum import Enum
-from typing import List
+from typing import TYPE_CHECKING, List, Optional, Type, Dict, Any
+
+
+from .policy.policy import Policy  # pragma: no cover
 
 from .context import EvaluationContext
 from .provider.base import AttributeProvider
@@ -56,7 +59,7 @@ class PDP(object):
     def __init__(self,
                  storage: StorageBase,
                  algorithm: EvaluationAlgorithm = EvaluationAlgorithm.DENY_OVERRIDES,
-                 providers: List[AttributeProvider] = None):
+                 providers: Optional[List[Type[AttributeProvider]]] = None):
         if not isinstance(storage, StorageBase):
             raise TypeError("Invalid type '{}' for storage.".format(type(storage)))
         if not isinstance(algorithm, EvaluationAlgorithm):
@@ -65,10 +68,11 @@ class PDP(object):
         self._algorithm = algorithm.value
         self._providers = providers or []
         for provider in self._providers:
-            if not isinstance(provider, AttributeProvider):
-                raise TypeError("Invalid type '{}' for attribute provider.".format(type(provider)))
+            if not issubclass(provider, AttributeProvider):
+                raise TypeError("{} is not a subclass of AttributeProvider"
+                                .format(provider.__name__))
 
-    def is_allowed(self, request: AccessRequest):
+    def is_allowed(self, request: AccessRequest) -> bool:
         """
             Check if authorization request is allowed
 
@@ -84,14 +88,14 @@ class PDP(object):
         ctx = EvaluationContext(request, self._providers)
 
         # Get filtered policies based on targets from storage
-        policies = self._storage.get_for_target(ctx.subject_id, ctx.resource_id, ctx.action_id)
+        policies: Any = self._storage.get_for_target(ctx.subject_id, ctx.resource_id, ctx.action_id)
         # Filter policies based on fit with authorization request
         policies = [policy for policy in policies if policy.fits(ctx)]
 
         return evaluate(policies)
 
     @staticmethod
-    def _allow_overrides(policies):
+    def _allow_overrides(policies: List[Policy]) -> bool:
         """
             Allow overrides evaluation algorithm
 
@@ -106,7 +110,7 @@ class PDP(object):
         return False
 
     @staticmethod
-    def _deny_overrides(policies):
+    def _deny_overrides(policies: List[Policy]) -> bool:
         """
             Deny overrides evaluation algorithm
 
@@ -120,7 +124,7 @@ class PDP(object):
                 return False
         return True
 
-    def _highest_priority(self, policies):
+    def _highest_priority(self, policies: List[Policy]) -> bool:
         """
             Highest priority evaluation algorithm
 
@@ -129,7 +133,7 @@ class PDP(object):
         """
         if not policies:
             return False
-        policy_groups = {}
+        policy_groups: Dict[int, List[Policy]] = {}
         max_priority = -1
         for policy in policies:
             if policy.priority > max_priority:

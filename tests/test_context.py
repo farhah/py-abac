@@ -11,17 +11,25 @@ from py_abac.request import AccessRequest
 
 
 class EmailAttributeProvider(AttributeProvider):
+    ace = "subject"
+    attribute_path = "$.email"
 
-    def get_attribute_value(self, ace, attribute_path, ctx):
-        if ace == "subject" and attribute_path == "$.email":
-            return "carl@gmail.com"
-
+    def get_attribute_value(self):
+        if not self.attribute_values:
+            # get user_id
+            user_id = self.attribute_values_cache[self.ace]["$.firstName"]
+            # check against db its email
+            # pretending to connect to db and find by user_id
+            self.attribute_values = "carl@gmail.com"
+        return self.attribute_values
 
 class FaultyAttributeProvider(AttributeProvider):
+    ace = "subject"
+    attribute_path = "$.email"
 
-    def get_attribute_value(self, ace, attribute_path, ctx):
+    def get_attribute_value(self):
         # This will test for infinite recessive loops
-        return ctx.get_attribute_value(ace, attribute_path)
+        return None
 
 
 def test_create():
@@ -91,7 +99,7 @@ def test_get_attribute_value():
         "context": {}
     }
     request = AccessRequest.from_json(request_json)
-    context = EvaluationContext(request, providers=[EmailAttributeProvider()])
+    context = EvaluationContext(request, providers=[EmailAttributeProvider])
     assert context.get_attribute_value("subject", "$.firstName") == "Carl"
     assert context.get_attribute_value("subject", "$.middleName") == ""
     assert context.get_attribute_value("subject", "$.email") == "carl@gmail.com"
@@ -121,14 +129,14 @@ def test_attribute_provider_infinite_recursion():
         "context": {}
     }
     request = AccessRequest.from_json(request_json)
-    context = EvaluationContext(request, providers=[FaultyAttributeProvider()])
+    context = EvaluationContext(request, providers=[FaultyAttributeProvider])
     assert context.get_attribute_value("subject", "$.email") is None
 
-    context = EvaluationContext(request, providers=[FaultyAttributeProvider(),
-                                                    EmailAttributeProvider(),
-                                                    FaultyAttributeProvider(),
-                                                    EmailAttributeProvider(),
-                                                    FaultyAttributeProvider()])
+    context = EvaluationContext(request, providers=[FaultyAttributeProvider,
+                                                    EmailAttributeProvider,
+                                                    FaultyAttributeProvider,
+                                                    EmailAttributeProvider,
+                                                    FaultyAttributeProvider])
     assert context.get_attribute_value("subject", "$.age") is None
 
 
