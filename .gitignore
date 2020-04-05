@@ -170,3 +170,6 @@ ENV/
 
 # others
 **/.idea/*
+
+# vscode
+**/.vscode/
