@@ -28,11 +28,11 @@ class EvaluationContext(object):
         self._resource_id = request.resource_id
         self._action_id = request.action_id
         self._request_provider = RequestAttributeProvider(request)
-        self._other_providers = list()
+        self._other_providers: List[AttributeProvider] = list()
         providers = providers or []
 
         for provider in providers:
-            self._other_providers.append(provider(self._request_provider.attribute_values_cache))
+            self._other_providers.append(provider(self._request_provider.attribute_values_cache, self))
 
         # Access control element being evaluated
         self._ace: Optional[str] = None

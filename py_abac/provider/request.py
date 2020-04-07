@@ -4,12 +4,12 @@
 from typing import Dict
 from objectpath import Tree
 
-from .base import BaseAttributeProvider
 from ..exceptions import InvalidAccessControlElementError, InvalidAttributePathError
 from ..request import AccessRequest
+from .base import AttributeProvider
 
 
-class RequestAttributeProvider(BaseAttributeProvider):
+class RequestAttributeProvider(AttributeProvider):
     """
         Request attribute provider
     """
@@ -20,7 +20,6 @@ class RequestAttributeProvider(BaseAttributeProvider):
 
             :param request: authorization request object
         """
-
         self._subject_tree = Tree(request.subject)
         self._resource_tree = Tree(request.resource)
         self._action_tree = Tree(request.action)
@@ -29,12 +28,12 @@ class RequestAttributeProvider(BaseAttributeProvider):
         # Cache of attribute location and value pairs per access element used for quick attribute
         # value retrieval
         self.attribute_values_cache: Dict[str, Dict[str, str]] = {"subject": {},
-                                                                  "resource": {},
-                                                                  "action": {},
-                                                                  "context": {}
+                                                                    "resource": {},
+                                                                    "action": {},
+                                                                    "context": {}
                                                                  }
 
-    def get_attribute_value(self, ace: str, attribute_path: str) -> str:
+    def get_attribute_value(self, ace=None, attribute_path=None) -> str:
         """
             Get value for given access control element and attribute path.
 

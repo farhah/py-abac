@@ -15,13 +15,15 @@ class EmailAttributeProvider(AttributeProvider):
     attribute_path = "$.email"
 
     def get_attribute_value(self):
-        if not self.attribute_values:
+        if not self.attribute_value:
             # get user_id
-            user_id = self.attribute_values_cache[self.ace]["$.firstName"]
+            user_id = self.find_value(self.ace, "$.firstName")
+            if not user_id:
+                return None
             # check against db its email
             # pretending to connect to db and find by user_id
-            self.attribute_values = "carl@gmail.com"
-        return self.attribute_values
+            self.attribute_value = "carl@gmail.com"
+        return self.attribute_value
 
 class FaultyAttributeProvider(AttributeProvider):
     ace = "subject"
